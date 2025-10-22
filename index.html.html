@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neab Learning: Class 12 PCMB Platform</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Apply Inter font family */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        /* Font for Calculator Display/Buttons */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc; /* Light background for the whole page */
+        }
+        .hikmah-primary {
+            color: #067c4d; 
+        }
+        .hikmah-bg-primary {
+            background-color: #067c4d; 
+        }
+        .hikmah-hover:hover {
+            background-color: #056a42;
+        }
+        
+        .content-area {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            min-height: 70vh;
+            transition: opacity 0.3s ease-in-out; 
+        }
+
+        .tab-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .tab-active {
+            background-color: #067c4d;
+            color: white;
+            box-shadow: 0 4px 12px rgba(6, 124, 77, 0.3);
+        }
+        .tab-inactive {
+            background-color: #e5e7eb; /* Gray-100 */
+            color: #4b5563; /* Gray-600 */
+        }
+        .chapter-card {
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .chapter-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f3f4f6;
+        }
+        
+        #filter-tabs {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        #filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .lesson-intro-animate {
+            animation: lessonZoomBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes lessonZoomBounce {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.95) translateY(20px);
+            }
+            70% { 
+                opacity: 1; 
+                transform: scale(1.01) translateY(0);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0);
+            }
+        }
+
+
+        .fade-in-content {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mandatory Tailwind classes for dynamic color generation */
+        .border-blue-400, .bg-blue-50, .text-blue-600, .bg-blue-500, .text-blue-800 {}
+        .border-orange-400, .bg-orange-50, .text-orange-600, .bg-orange-500, .text-orange-800 {}
+        .border-green-400, .bg-green-50, .text-green-600, .bg-green-500, .text-green-800 {}
+        .text-red-600, .text-red-500, .bg-red-50, .border-red-200, .text-gray-600 {}
+        .border-purple-400, .bg-purple-50, .text-purple-600, .bg-purple-500, .text-purple-800, .bg-purple-600 {}
+
+        /* --- Custom Styles for Periodic Table Colors --- */
+        .color-nonmetal { background-color: #4ade80; color: #166534; } /* Green */
+        .color-alkali-metal { background-color: #fca5a5; color: #991b1b; } /* Light Red */
+        .color-alkaline-earth-metal { background-color: #fcd34d; color: #92400e; } /* Yellow */
+        .color-metalloid { background-color: #a78bfa; color: #5b21b6; } /* Purple */
+        .color-post-transition-metal { background-color: #60a5fa; color: #1e40af; } /* Blue */
+        .color-transition-metal { background-color: #f97316; color: #9a3412; } /* Orange */
+        .color-lanthanide { background-color: #facc15; color: #a16207; } /* Gold */
+        .color-actinide { background-color: #c084fc; color: #7e22ce; } /* Violet */
+        .color-noble-gas { background-color: #38bdf8; color: #075985; } /* Cyan */
+        .color-halogen { background-color: #f472b6; color: #9d174d; } /* Pink */
+        .color-unknown { background-color: #e5e7eb; color: #4b5563; } /* Gray */
+
+        /* Calculator specific styles */
+        .calc-display {
+            font-family: 'Fira Code', monospace;
+            text-align: right;
+        }
+        .calc-button {
+            font-family: 'Fira Code', monospace;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .calc-button:active {
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header / Navigation Bar -->
+    <header class="bg-white shadow-lg sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="text-2xl font-extrabold flex items-center cursor-pointer" onclick="renderPage('dashboard')">
+                <span class="text-gray-800 mr-1">Neab</span><span class="hikmah-primary">Learning</span>
+            </div>
+
+            <!-- Nav Links (Visible on medium/large) -->
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#" onclick="renderPage('subject', 'Physics')" class="hover:hikmah-primary transition">Physics</a>
+                <a href="#" onclick="renderPage('subject', 'Chemistry')" class="hover:hikmah-primary transition">Chemistry</a>
+                <a href="#" onclick="renderPage('subject', 'Math')" class="hover:hikmah-primary transition">Mathematics</a>
+                <a href="#" onclick="renderPage('subject', 'Biology')" class="hover:hikmah-primary transition">Biology</a>
+                <!-- NEW: Tools Link -->
+                <a href="#" onclick="renderPage('tools')" class="hover:hikmah-primary transition font-bold text-blue-600">Tools</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-4">
+                <button class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition relative"
+                    onclick="renderPage('notifications')">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                    <span id="unread-indicator" class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 transition-opacity" style="opacity: 0;"></span>
+                </button>
+                <button class="hikmah-bg-primary text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:hikmah-hover transition hidden sm:block"
+                    onclick="renderPage('profile')">
+                    Profile
+                </button>
+                <button class="md:hidden p-2 text-gray-600 hover:text-gray-800 transition">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area Wrapper -->
+    <main id="app-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-16">
+        <div class="content-area p-10 text-center">
+            <i data-lucide="loader" class="w-10 h-10 animate-spin text-gray-400 mx-auto"></i>
+            <p class="text-gray-600 mt-3">Initializing platform...</p>
+        </div>
+    </main>
+
+    <!-- Footer - UPDATED: Copyright year changed to 2025 and 2025-2026 -->
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        &copy; 2025 Neab Learning Platform. All rights reserved. Built by Abhinash.
+    </footer>
+
+    <!-- MODAL FOR PERIODIC TABLE PROPERTIES -->
+    <div id="element-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" onclick="closeElementProperties()">
+        <div id="element-modal-content" class="bg-white rounded-xl p-6 shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-95 opacity-0" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start border-b pb-3 mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i data-lucide="info" class="w-6 h-6 mr-2 text-blue-600"></i>
+                    Element Properties
+                </h3>
+                <button onclick="closeElementProperties()" class="text-gray-500 hover:text-red-500 transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <!-- Dynamic content injected here -->
+            <div id="element-details" class="space-y-3">
+                <!-- Details will be injected here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // --- FIREBASE AND APP INITIALIZATION START ---
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setDoc, doc, setLogLevel, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let userId = 'loading'; 
+        let userProgress = {};
+        let unsubscribeProgress = null; 
+
+        window.__currentSubject = null;
+        window.__currentChapterId = null;
+        window.__currentPage = null; 
+        window.__currentTool = 'calculator'; // NEW: Default tool state
+
+        function getProgressDocRef(chapterId) {
+            if (!db || userId === 'loading' || userId.startsWith('mock-')) {
+                return null;
+            }
+            return doc(db, `artifacts/${appId}/users/${userId}/progress`, chapterId);
+        }
+
+        async function saveProgress(chapterId, isComplete) {
+            const docRef = getProgressDocRef(chapterId);
+            const now = new Date().toISOString();
+            
+            if (!docRef) {
+                console.warn("Cannot save progress in mock mode. Mocking update.");
+                userProgress[chapterId] = { completed: isComplete, timestamp: now };
+                if (window.__currentSubject && window.__currentChapterId === chapterId) {
+                    renderPage('lesson', window.__currentSubject, chapterId, { skipAnimation: true });
+                }
+                if (window.__currentPage === 'profile' || window.__currentPage === 'notifications') {
+                    renderPage(window.__currentPage, null, null, { skipAnimation: true });
+                }
+                return;
+            }
+
+            try {
+                await setDoc(docRef, { completed: isComplete, timestamp: now }, { merge: true });
+                console.log(`Progress saved for ${chapterId}: ${isComplete}`);
+            } catch (e) {
+                console.error("Error saving progress:", e);
+            }
+        }
+        
+        window.toggleChapterComplete = function(subject, chapterId, isComplete) {
+             saveProgress(chapterId, isComplete);
+        }
+
+        function loadProgress() {
+            if (unsubscribeProgress) {
+                unsubscribeProgress();
+            }
+            
+            if (!db || userId === 'loading' || userId.startsWith('mock-')) {
+                return;
+            }
+
+            const progressCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/progress`);
+
+            unsubscribeProgress = onSnapshot(progressCollectionRef, (snapshot) => {
+                const newProgress = {};
+                snapshot.forEach((doc) => {
+                    newProgress[doc.id] = doc.data();
+                });
+                userProgress = newProgress;
+                console.log("Progress updated:", userProgress);
+                
+                if (window.__currentSubject && window.__currentChapterId) {
+                    renderPage('lesson', window.__currentSubject, window.__currentChapterId, { skipAnimation: true });
+                }
+                if (window.__currentPage === 'profile' || window.__currentPage === 'notifications') {
+                    renderPage(window.__currentPage, null, null, { skipAnimation: true });
+                }
+                
+                updateUnreadIndicator();
+
+            }, (error) => {
+                console.error("Error listening to progress:", error);
+            });
+        }
+        
+        const staticNotifications = [
+            { id: 'S1', type: 'System', title: 'Platform Update', message: 'Academic Year **2025-26** NCERT Syllabus is now fully loaded.', date: '2025-10-21T10:00:00.000Z', read: false, action: "renderPage('dashboard')" },
+            { id: 'S2', type: 'System', title: 'Welcome!', message: 'Explore the Notes and Key Formulas tab for Chapter P1: Electric Charges and Fields.', date: '2025-10-21T09:00:00.000Z', read: true, action: "renderPage('lesson', 'Physics', 'P1')" },
+        ];
+        
+        function generateRealTimeNotifications() {
+            let notifications = [...staticNotifications];
+            for (const chapterId in userProgress) {
+                const progress = userProgress[chapterId];
+                
+                let chapter = null;
+                let subject = '';
+                for (const sub in ncertChapters) {
+                    const found = ncertChapters[sub].find(c => c.id === chapterId);
+                    if (found) {
+                        chapter = found;
+                        subject = sub;
+                        break;
+                    }
+                }
+                
+                if (!chapter || !progress.timestamp) continue;
+                
+                if (progress.completed) {
+                    notifications.push({
+                        id: `P-${chapterId}`,
+                        type: 'Progress',
+                        title: `Chapter ${chapter.chapter} Completed!`,
+                        message: `You successfully completed the notes for **${subject}: ${chapter.title}**. Keep up the great work!`,
+                        date: progress.timestamp,
+                        read: false,
+                        action: `renderPage('lesson', '${subject}', '${chapterId}')`
+                    });
+                } 
+            }
+
+            notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const newestProgressDate = notifications.filter(n => n.type === 'Progress').reduce((maxDate, n) => {
+                 const current = new Date(n.date);
+                 return current > maxDate ? current : maxDate;
+            }, new Date(0));
+
+            return notifications.map(n => {
+                 if (n.type !== 'Progress' && new Date(n.date) < newestProgressDate) {
+                     return { ...n, read: true };
+                 }
+                 return n;
+            });
+        }
+        
+        function updateUnreadIndicator() {
+            const indicator = document.getElementById('unread-indicator');
+            if (!indicator) return;
+            
+            const notifications = generateRealTimeNotifications();
+            const unreadCount = notifications.filter(n => !n.read).length;
+            
+            indicator.style.opacity = unreadCount > 0 ? '1' : '0';
+        }
+
+
+        async function initializeFirebase() {
+            setLogLevel('Debug');
+
+            if (!firebaseConfig) {
+                console.error("Firebase config not found. Running in mock mode.");
+                userId = 'mock-user-' + crypto.randomUUID().substring(0, 8);
+                renderPage('dashboard');
+                return;
+            }
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log(`Firebase initialized and user signed in. User ID: ${userId}`);
+                        loadProgress();
+                    } else {
+                        console.log("User signed out or anonymous. Generating temporary ID.");
+                        userId = 'anonymous-' + crypto.randomUUID();
+                    }
+                    renderPage('dashboard');
+                });
+
+            } catch (e) {
+                console.error("Error during Firebase initialization:", e);
+                userId = 'error-user-' + crypto.randomUUID().substring(0, 8);
+                renderPage('dashboard');
+            }
+        }
+        // --- FIREBASE AND APP INITIALIZATION END ---
+
+        // --- NCERT Chapter Data and Course Data (Unchanged) ---
+        const courseData = [
+            { id: 1, title: "Electromagnetism: Advanced Concepts", image: "https://placehold.co/400x250/007AFF/ffffff?text=Physics", description: "Detailed lectures on Electrostatics, EMI, and AC Circuits. Essential for JEE/NEET.", subject: "Physics", duration: null, capacity: "Unlimited" }, 
+            { id: 2, title: "Organic Chemistry: Named Reactions", image: "https://placehold.co/400x250/F59E0B/ffffff?text=Chemistry", description: "In-depth mechanism and practice for all key named reactions (e.g., Aldol, Cannizaro).", subject: "Chemistry", duration: null, capacity: "50 Seats" }, 
+            { id: 3, title: "Advanced Calculus: Integration & Vectors", image: "https://placehold.co/400x250/10B981/ffffff?text=Math", description: "Master Definite Integrals, Differential Equations, and 3D Vector Algebra.", subject: "Math", duration: null, capacity: "Unlimited" }, 
+            { id: 4, title: "Modern Biology: Genetics & Ecology", image: "https://placehold.co/400x250/9333ea/ffffff?text=Biology", description: "Master Mendel's principles, Molecular Biology, and key ecological interactions. Essential for NEET.", subject: "Biology", duration: null, capacity: "Unlimited" },
+        ];
+        
+        const ncertChapters = {
+            'Physics': [
+                { id: 'P1', chapter: 1, title: "Electric Charges and Fields" },
+                { id: 'P2', chapter: 2, title: "Electrostatic Potential and Capacitance" },
+                { id: 'P3', chapter: 3, title: "Current Electricity" },
+                { id: 'P4', chapter: 4, title: "Moving Charges and Magnetism" },
+                { id: 'P5', chapter: 5, title: "Magnetism and Matter" },
+                { id: 'P6', chapter: 6, title: "Electromagnetic Induction" },
+                { id: 'P7', chapter: 7, title: "Alternating Current" },
+                { id: 'P8', chapter: 8, title: "Electromagnetic Waves" },
+                { id: 'P9', chapter: 9, title: "Ray Optics and Optical Instruments" },
+                { id: 'P10', chapter: 10, title: "Wave Optics" },
+                { id: 'P11', chapter: 11, title: "Dual Nature of Radiation and Matter" },
+                { id: 'P12', chapter: 12, title: "Atoms" },
+                { id: 'P13', chapter: 13, title: "Nuclei" },
+                { id: 'P14', chapter: 14, title: "Semiconductor Electronics: Materials, Devices and Simple Circuits" },
+            ],
+            'Chemistry': [
+                { id: 'C1', chapter: 1, title: "Solutions" },
+                { id: 'C2', chapter: 2, title: "Electrochemistry" },
+                { id: 'C3', chapter: 3, title: "Chemical Kinetics" },
+                { id: 'C4', chapter: 4, title: "d and f-Block Elements" },
+                { id: 'C5', chapter: 5, title: "Coordination Compounds" },
+                { id: 'C6', chapter: 6, title: "Haloalkanes and Haloarenes" },
+                { id: 'C7', chapter: 7, title: "Alcohols, Phenols and Ethers" },
+                { id: 'C8', chapter: 8, title: "Aldehydes, Ketones and Carboxylic Acids" },
+                { id: 'C9', chapter: 9, title: "Amines" },
+                { id: 'C10', chapter: 10, title: "Biomolecules" },
+            ],
+            'Math': [
+                { id: 'M1', chapter: 1, title: "Relations and Functions" },
+                { id: 'M2', chapter: 2, title: "Inverse Trigonometric Functions" },
+                { id: 'M3', chapter: 3, title: "Matrices" },
+                { id: 'M4', chapter: 4, title: "Determinants" },
+                { id: 'M5', chapter: 5, title: "Continuity and Differentiability" },
+                { id: 'M6', chapter: 6, title: "Applications of Derivatives" },
+                { id: 'M7', chapter: 7, title: "Integrals" },
+                { id: 'M8', chapter: 8, title: "Applications of Integrals" },
+                { id: 'M9', chapter: 9, title: "Differential Equations" },
+                { id: 'M10', chapter: 10, title: "Vector Algebra" },
+                { id: 'M11', chapter: 11, title: "Three Dimensional Geometry" },
+                { id: 'M12', chapter: 12, title: "Linear Programming" },
+                { id: 'M13', chapter: 13, title: "Probability" },
+            ],
+            'Biology': [
+                { id: 'B1', chapter: 1, title: "Reproduction in Organisms" },
+                { id: 'B2', chapter: 2, title: "Sexual Reproduction in Flowering Plants" },
+                { id: 'B3', chapter: 3, title: "Human Reproduction" },
+                { id: 'B4', chapter: 4, title: "Reproductive Health" },
+                { id: 'B5', chapter: 5, title: "Principles of Inheritance and Variation" },
+                { id: 'B6', chapter: 6, title: "Molecular Basis of Inheritance" },
+                { id: 'B7', chapter: 7, title: "Evolution" },
+                { id: 'B8', chapter: 8, title: "Human Health and Disease" },
+                { id: 'B9', chapter: 9, title: "Strategies for Enhancement in Food Production" },
+                { id: 'B10', chapter: 10, title: "Microbes in Human Welfare" },
+                { id: 'B11', chapter: 11, title: "Biotechnology: Principles and Processes" },
+                { id: 'B12', chapter: 12, title: "Biotechnology and its Applications" },
+                { id: 'B13', chapter: 13, title: "Organisms and Populations" },
+                { id: 'B14', chapter: 14, "title": "Ecosystem" },
+                { id: 'B15', chapter: 15, "title": "Biodiversity and Conservation" },
+                { id: 'B16', chapter: 16, "title": "Environmental Issues" },
+            ],
+        };
+        
+        const chapterFormulas = {
+            'P1': [
+                { name: "Coulomb's Law", formula: `$$F = k \\frac{|q_1 q_2|}{r^2}$$` },
+                { name: "Electric Field", formula: `$$\\vec{E} = \\frac{\\vec{F}}{q_0}$$` },
+                { name: "Electric Field from Point Charge", formula: `$$E = k \\frac{|q|}{r^2}$$` },
+            ],
+            'P2': [
+                { name: "Electric Potential", formula: `$$V = \\frac{W}{q_0}$$` },
+                { name: "Capacitance (General)", formula: `$$C = \\frac{Q}{V}$$` },
+                { name: "Capacitance (Parallel Plate)", formula: `$$C = \\frac{\\epsilon_0 A}{d}$$` },
+            ],
+            'C1': [
+                { name: "Raoult's Law (Volatile Components)", formula: `$$P_{\\text{total}} = P_A^0 x_A + P_B^0 x_B$$` },
+                { name: "Molality", formula: `$$m = \\frac{\\text{moles of solute}}{\\text{mass of solvent (kg)}}$$` },
+                { name: "Freezing Point Depression", formula: `$$\\Delta T_f = i K_f m$$` },
+            ],
+            'C2': [
+                 { name: "Nernst Equation", formula: `$$E_{\\text{cell}} = E_{\\text{cell}}^0 - \\frac{0.0591}{n} \\log Q$$` },
+                 { name: "Gibbs Free Energy", formula: `$$\\Delta G^0 = -n F E_{\\text{cell}}^0$$` },
+                 { name: "Kohlrausch's Law", formula: `$$\\Lambda_m^0 = x \\lambda_A + y \\lambda_B$$` },
+            ],
+            'M1': [
+                { name: "Identity Function", formula: `$$f(x) = x$$` },
+                { name: "Composite Function", formula: `$$g \\circ f(x) = g(f(x))$$` },
+                { name: "Range of Function $f$", formula: `$$\\text{Range}(f) = \\{ f(x) : x \\in \\text{Domain}(f) \\}$$` },
+            ],
+             'M2': [
+                { name: "Principal Value Branch", formula: `$$\\sin^{-1} x \\in \\left[ -\\frac{\\pi}{2}, \\frac{\\pi}{2} \\right]$$` },
+                { name: "Inverse Tangent Identity", formula: `$$\\tan^{-1} x + \\cot^{-1} x = \\frac{\\pi}{2}$$` },
+                { name: "Conversion Formula", formula: `$$\\cos^{-1} x = \\sin^{-1} \\sqrt{1-x^2}$$` },
+            ],
+            'B5': [ 
+                { name: "Mendel's First Law (Monohybrid)", formula: `$$T \\times t \\rightarrow \\text{all } Tt \\text{ in } F_1$$` },
+                { name: "Dihybrid Phenotypic Ratio", formula: `$$9:3:3:1 \\text{ (In } F_2 \\text{ generation)}$$` },
+                { name: "Test Cross Ratio", formula: `$$1:1:1:1 \\text{ (Dihybrid)}$$` },
+            ],
+            'B6': [ 
+                { name: "Chargaff's Rule", formula: `$$\\frac{[A] + [G]}{[T] + [C]} = 1$$` },
+                { name: "Central Dogma (Simplified)", formula: `$$\\text{DNA} \\xrightarrow{\\text{Transcription}} \\text{RNA} \\xrightarrow{\\text{Translation}} \\text{Protein}$$` },
+            ],
+        };
+
+        function calculateTotalChapters() {
+            let total = 0;
+            for (const subject in ncertChapters) {
+                total += ncertChapters[subject].length;
+            }
+            return total;
+        }
+
+        function calculateCompletedChapters() {
+            let completedCount = 0;
+            for (const chapterId in userProgress) {
+                if (userProgress[chapterId].completed === true) {
+                    completedCount++;
+                }
+            }
+            return completedCount;
+        }
+        // --- END: NCERT Chapter Data and Course Data ---
+
+
+        // --- PAGE RENDERING LOGIC (Updated to include 'tools') ---
+
+        window.renderPage = function(pageName, identifier1 = null, identifier2 = null, options = {}) {
+            const appContent = document.getElementById('app-content');
+            const { skipAnimation = false } = options;
+
+            appContent.classList.remove('lesson-intro-animate');
+            appContent.style.opacity = '0'; 
+
+            window.__currentSubject = identifier1;
+            window.__currentChapterId = identifier2;
+            window.__currentPage = pageName; 
+
+            setTimeout(() => {
+                let pageHtml = '';
+                if (pageName === 'dashboard') {
+                    pageHtml = renderDashboardPage();
+                } else if (pageName === 'subject') {
+                    pageHtml = renderSubjectPage(identifier1); 
+                } else if (pageName === 'lesson') {
+                    const chapter = ncertChapters[identifier1] ? ncertChapters[identifier1].find(c => c.id === identifier2) : null;
+                    if (chapter) {
+                         pageHtml = renderLessonPage(identifier1, identifier2);
+                    } else {
+                         pageHtml = renderErrorPage('Chapter Not Found', 'The chapter reference is invalid. Please go back to the subject list.');
+                    }
+                } else if (pageName === 'profile') { 
+                    pageHtml = renderProfilePage();
+                } else if (pageName === 'notifications') { 
+                    pageHtml = renderNotificationPage();
+                } else if (pageName === 'tools') { // NEW: Tools Page
+                    pageHtml = renderToolsPage();
+                }
+
+
+                appContent.innerHTML = pageHtml;
+                lucide.createIcons();
+                
+                if (pageName === 'lesson' && !skipAnimation) {
+                    appContent.classList.add('lesson-intro-animate');
+                } else {
+                    appContent.style.opacity = '1';
+                }
+
+                if (pageName === 'lesson') {
+                    setTimeout(() => {
+                        updateLessonContent('Notes', identifier1, identifier2);
+                    }, 50); 
+                }
+                
+                if (pageName === 'notifications') {
+                    updateUnreadIndicator();
+                }
+                
+                // NEW: Initialize tools if on the tools page
+                if (pageName === 'tools') {
+                    // This initializes the default tool (calculator) on load
+                    updateToolContent(window.__currentTool); 
+                }
+
+                console.log(`Rendering page: ${pageName}, Subject: ${identifier1}, Chapter ID: ${identifier2}`);
+            }, 100);
+        }
+
+        // --- NEW FUNCTION: Renders the Tools Page ---
+        window.renderToolsPage = function() {
+            // Note: The __currentTool state is set/updated by updateToolContent
+            
+            return `
+                <div class="content-area p-6 lg:p-10">
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 border-b pb-4 flex items-center">
+                        <i data-lucide="wrench" class="w-8 h-8 mr-3 text-blue-600"></i> Essential Academic Tools
+                    </h1>
+
+                    <!-- Tool Tab Navigation -->
+                    <div class="flex space-x-4 overflow-x-auto border-b pb-1 mb-6">
+                        <button id="tool-calculator" onclick="updateToolContent('calculator')" class="text-gray-500 hover:text-blue-700 font-medium py-2 transition whitespace-nowrap">
+                            <i data-lucide="calculator" class="w-4 h-4 mr-1 inline-block"></i> Scientific Calculator
+                        </button>
+                        <button id="tool-periodic-table" onclick="updateToolContent('periodic-table')" class="text-gray-500 hover:text-blue-700 font-medium py-2 transition whitespace-nowrap">
+                            <i data-lucide="atom" class="w-4 h-4 mr-1 inline-block"></i> Periodic Table
+                        </button>
+                        <button id="tool-unit-converter" onclick="updateToolContent('unit-converter')" class="text-gray-500 hover:text-blue-700 font-medium py-2 transition whitespace-nowrap">
+                            <i data-lucide="scale" class="w-4 h-4 mr-1 inline-block"></i> Unit Converter
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Tool Content Area -->
+                    <div id="tool-content-display" class="min-h-[600px] border border-gray-200 rounded-xl p-4 lg:p-8 bg-gray-50 shadow-inner">
+                        <!-- Tool content will be injected here -->
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- NEW FUNCTION: Updates the content area within the Tools Page ---
+        window.updateToolContent = function(toolName) {
+            const contentDiv = document.getElementById('tool-content-display');
+            if (!contentDiv) return;
+
+            // Update global state
+            window.__currentTool = toolName;
+
+            // Update button states
+            const tools = ['calculator', 'periodic-table', 'unit-converter'];
+            tools.forEach(tool => {
+                const btn = document.getElementById(`tool-${tool}`);
+                if (btn) {
+                    btn.className = (tool === toolName) 
+                        ? 'text-blue-600 border-b-2 border-blue-600 font-semibold py-2 transition whitespace-nowrap'
+                        : 'text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap';
+                }
+            });
+
+            // Added Fade-in animation when switching tabs
+            contentDiv.classList.remove('fade-in-content');
+            void contentDiv.offsetWidth; 
+            contentDiv.classList.add('fade-in-content');
+
+            let contentHtml = '';
+            
+            if (toolName === 'calculator') {
+                contentHtml = renderScientificCalculator();
+                // Need to initialize the calculator state after rendering
+                setTimeout(initializeCalculator, 100);
+            } else if (toolName === 'periodic-table') {
+                contentHtml = renderPeriodicTable();
+                setTimeout(lucide.createIcons, 100);
+            } else if (toolName === 'unit-converter') {
+                contentHtml = renderUnitConverter();
+                // Need to initialize the converter state after rendering
+                setTimeout(initializeUnitConverter, 100); 
+            }
+
+            contentDiv.innerHTML = contentHtml;
+            lucide.createIcons();
+        }
+
+        // -------------------------------------------------------------------
+        // --- 1. SCIENTIFIC CALCULATOR IMPLEMENTATION ---
+        // -------------------------------------------------------------------
+        
+        let displayValue = '0';
+        let currentExpression = '';
+        let resultDisplayed = false;
+
+        function initializeCalculator() {
+            // Reset state
+            displayValue = '0';
+            currentExpression = '';
+            resultDisplayed = false;
+            updateCalculatorDisplay();
+        }
+        
+        function updateCalculatorDisplay() {
+            document.getElementById('calc-display-result').value = displayValue;
+            document.getElementById('calc-display-history').innerText = currentExpression;
+        }
+
+        window.appendInput = function(input) {
+            const displayEl = document.getElementById('calc-display-result');
+            
+            if (resultDisplayed) {
+                if ('+-*/'.includes(input)) {
+                    currentExpression = displayValue;
+                } else {
+                    currentExpression = '';
+                }
+                displayValue = (input === '0' || '+-*/'.includes(input)) ? displayValue : '';
+                resultDisplayed = false;
+            }
+
+            if (displayValue === '0' && !'+-*/'.includes(input)) {
+                displayValue = '';
+            }
+            
+            // Basic input sanitation to prevent double operators/decimals
+            if (displayValue.length > 0 && '+-*/'.includes(input) && '+-*/'.includes(displayValue.slice(-1))) {
+                 // Replace last operator
+                 displayValue = displayValue.slice(0, -1) + input;
+            } else if (displayValue.length > 0 && input === '.' && displayValue.slice(-1) === '.') {
+                 // Ignore double decimal
+            } else {
+                displayValue += input;
+            }
+
+            currentExpression += input;
+            updateCalculatorDisplay();
+        }
+        
+        window.clearDisplay = function() {
+            displayValue = '0';
+            currentExpression = '';
+            resultDisplayed = false;
+            updateCalculatorDisplay();
+        }
+
+        window.calculateResult = function() {
+            try {
+                // Sanitize and replace custom math functions for eval
+                let safeExpression = displayValue.replace(/sin\(/g, 'Math.sin(')
+                                                 .replace(/cos\(/g, 'Math.cos(')
+                                                 .replace(/tan\(/g, 'Math.tan(')
+                                                 .replace(/log\(/g, 'Math.log10(') // Assuming log base 10
+                                                 .replace(/ln\(/g, 'Math.log(')    // Natural log
+                                                 .replace(/\^/g, '**')
+                                                 .replace(/π/g, 'Math.PI')
+                                                 .replace(/√\(/g, 'Math.sqrt(')
+                                                 .replace(/e/g, 'Math.E');
+
+                // Basic error handling for incomplete expressions
+                if (safeExpression.includes('(') && !safeExpression.includes(')')) {
+                    safeExpression += ')';
+                }
+                
+                // Final evaluation
+                let result = eval(safeExpression);
+                
+                // Handle complex numbers, infinity, or NaN
+                if (isNaN(result) || !isFinite(result)) {
+                    displayValue = 'Error';
+                } else {
+                    displayValue = result.toString();
+                }
+                
+                currentExpression = safeExpression + ' =';
+                resultDisplayed = true;
+
+            } catch (e) {
+                displayValue = 'Error';
+                currentExpression = 'Invalid Input';
+                resultDisplayed = true;
+            }
+            updateCalculatorDisplay();
+        }
+
+        function renderScientificCalculator() {
+             const buttonClass = "calc-button text-2xl font-bold p-3 rounded-xl shadow-md transition-all active:shadow-none active:translate-y-0.5";
+             const numberClass = `${buttonClass} bg-white text-gray-800 hover:bg-gray-100`;
+             const operatorClass = `${buttonClass} bg-orange-500 text-white hover:bg-orange-600`;
+             const functionClass = `${buttonClass} bg-blue-100 text-blue-800 hover:bg-blue-200 text-lg`;
+             const clearClass = `${buttonClass} bg-red-500 text-white hover:bg-red-600`;
+
+             return `
+                 <div class="max-w-md mx-auto p-6 bg-gray-200 rounded-3xl shadow-2xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i data-lucide="calculator" class="w-6 h-6 mr-2 text-blue-600"></i> Scientific Calculator
+                    </h2>
+                    
+                    <!-- Display -->
+                    <div class="mb-4 p-4 bg-gray-800 rounded-xl shadow-inner">
+                        <div id="calc-display-history" class="calc-display text-sm text-gray-400 min-h-[1.5rem] overflow-x-auto whitespace-nowrap"></div>
+                        <input id="calc-display-result" type="text" value="0" readonly
+                               class="calc-display w-full text-4xl font-extrabold text-white bg-transparent border-none focus:ring-0 pt-1 pb-0 mb-0 outline-none overflow-x-auto">
+                    </div>
+
+                    <!-- Buttons Grid -->
+                    <div class="grid grid-cols-5 gap-3">
+                        <!-- Row 1: Functions -->
+                        <button onclick="appendInput('sin(')" class="${functionClass}">sin</button>
+                        <button onclick="appendInput('cos(')" class="${functionClass}">cos</button>
+                        <button onclick="appendInput('tan(')" class="${functionClass}">tan</button>
+                        <button onclick="appendInput('log(')" class="${functionClass}">log</button>
+                        <button onclick="clearDisplay()" class="${clearClass}">AC</button>
+                        
+                        <!-- Row 2 -->
+                        <button onclick="appendInput('ln(')" class="${functionClass}">ln</button>
+                        <button onclick="appendInput('√(')" class="${functionClass}">√</button>
+                        <button onclick="appendInput('π')" class="${functionClass}">π</button>
+                        <button onclick="appendInput('^')" class="${functionClass}">^</button>
+                        <button onclick="appendInput('/')" class="${operatorClass} text-3xl">÷</button>
+
+                        <!-- Row 3 -->
+                        <button onclick="appendInput('7')" class="${numberClass}">7</button>
+                        <button onclick="appendInput('8')" class="${numberClass}">8</button>
+                        <button onclick="appendInput('9')" class="${numberClass}">9</button>
+                        <button onclick="appendInput('(')" class="${functionClass}">(</button>
+                        <button onclick="appendInput('*')" class="${operatorClass}">×</button>
+                        
+                        <!-- Row 4 -->
+                        <button onclick="appendInput('4')" class="${numberClass}">4</button>
+                        <button onclick="appendInput('5')" class="${numberClass}">5</button>
+                        <button onclick="appendInput('6')" class="${numberClass}">6</button>
+                        <button onclick="appendInput(')')" class="${functionClass}">)</button>
+                        <button onclick="appendInput('-')" class="${operatorClass}">−</button>
+
+                        <!-- Row 5 -->
+                        <button onclick="appendInput('1')" class="${numberClass}">1</button>
+                        <button onclick="appendInput('2')" class="${numberClass}">2</button>
+                        <button onclick="appendInput('3')" class="${numberClass}">3</button>
+                        <button onclick="calculateResult()" class="col-span-2 ${operatorClass} bg-green-600 hover:bg-green-700">=</button>
+
+                        <!-- Row 6 -->
+                        <button onclick="appendInput('0')" class="col-span-2 ${numberClass}">0</button>
+                        <button onclick="appendInput('.')" class="${numberClass}">.</button>
+                        <button onclick="appendInput('+')" class="${operatorClass}">+</button>
+                        <button onclick="appendInput('e')" class="${functionClass}">e</button>
+
+                    </div>
+                 </div>
+             `;
+        }
+
+
+        // -------------------------------------------------------------------
+        // --- 2. PERIODIC TABLE IMPLEMENTATION ---
+        // -------------------------------------------------------------------
+        const periodicTableData = [
+            { symbol: 'H', name: 'Hydrogen', number: 1, mass: 1.008, group: 1, period: 1, type: 'nonmetal' },
+            { symbol: 'He', name: 'Helium', number: 2, mass: 4.0026, group: 18, period: 1, type: 'noble-gas' },
+            { symbol: 'Li', name: 'Lithium', number: 3, mass: 6.94, group: 1, period: 2, type: 'alkali-metal' },
+            { symbol: 'Be', name: 'Beryllium', number: 4, mass: 9.0122, group: 2, period: 2, type: 'alkaline-earth-metal' },
+            { symbol: 'B', name: 'Boron', number: 5, mass: 10.81, group: 13, period: 2, type: 'metalloid' },
+            { symbol: 'C', name: 'Carbon', number: 6, mass: 12.011, group: 14, period: 2, type: 'nonmetal' },
+            { symbol: 'N', name: 'Nitrogen', number: 7, mass: 14.007, group: 15, period: 2, type: 'nonmetal' },
+            { symbol: 'O', name: 'Oxygen', number: 8, mass: 15.999, group: 16, period: 2, type: 'nonmetal' },
+            { symbol: 'F', name: 'Fluorine', number: 9, mass: 18.998, group: 17, period: 2, type: 'halogen' },
+            { symbol: 'Ne', name: 'Neon', number: 10, mass: 20.180, group: 18, period: 2, type: 'noble-gas' },
+            { symbol: 'Na', name: 'Sodium', number: 11, mass: 22.990, group: 1, period: 3, type: 'alkali-metal' },
+            { symbol: 'Mg', name: 'Magnesium', number: 12, mass: 24.305, group: 2, period: 3, type: 'alkaline-earth-metal' },
+            { symbol: 'Al', name: 'Aluminum', number: 13, mass: 26.982, group: 13, period: 3, type: 'post-transition-metal' },
+            { symbol: 'Si', name: 'Silicon', number: 14, mass: 28.085, group: 14, period: 3, type: 'metalloid' },
+            { symbol: 'P', name: 'Phosphorus', number: 15, mass: 30.974, group: 15, period: 3, type: 'nonmetal' },
+            { symbol: 'S', name: 'Sulfur', number: 16, mass: 32.06, group: 16, period: 3, type: 'nonmetal' },
+            { symbol: 'Cl', name: 'Chlorine', number: 17, mass: 35.45, group: 17, period: 3, type: 'halogen' },
+            { symbol: 'Ar', name: 'Argon', number: 18, mass: 39.948, group: 18, period: 3, type: 'noble-gas' },
+            { symbol: 'K', name: 'Potassium', number: 19, mass: 39.098, group: 1, period: 4, type: 'alkali-metal' },
+            { symbol: 'Ca', name: 'Calcium', number: 20, mass: 40.078, group: 2, period: 4, type: 'alkaline-earth-metal' },
+            { symbol: 'Sc', name: 'Scandium', number: 21, mass: 44.956, group: 3, period: 4, type: 'transition-metal' },
+            { symbol: 'Ti', name: 'Titanium', number: 22, mass: 47.867, group: 4, period: 4, type: 'transition-metal' },
+            { symbol: 'V', name: 'Vanadium', number: 23, mass: 50.942, group: 5, period: 4, type: 'transition-metal' },
+            { symbol: 'Cr', name: 'Chromium', number: 24, mass: 51.996, group: 6, period: 4, type: 'transition-metal' },
+            { symbol: 'Mn', name: 'Manganese', number: 25, mass: 54.938, group: 7, period: 4, type: 'transition-metal' },
+            { symbol: 'Fe', name: 'Iron', number: 26, mass: 55.845, group: 8, period: 4, type: 'transition-metal' },
+            { symbol: 'Co', name: 'Cobalt', number: 27, mass: 58.933, group: 9, period: 4, type: 'transition-metal' },
+            { symbol: 'Ni', name: 'Nickel', number: 28, mass: 58.693, group: 10, period: 4, type: 'transition-metal' },
+            { symbol: 'Cu', name: 'Copper', number: 29, mass: 63.546, group: 11, period: 4, type: 'transition-metal' },
+            { symbol: 'Zn', name: 'Zinc', number: 30, mass: 65.38, group: 12, period: 4, type: 'transition-metal' },
+            { symbol: 'Ga', name: 'Gallium', number: 31, mass: 69.723, group: 13, period: 4, type: 'post-transition-metal' },
+            { symbol: 'Ge', name: 'Germanium', number: 32, mass: 72.63, group: 14, period: 4, type: 'metalloid' },
+            { symbol: 'As', name: 'Arsenic', number: 33, mass: 74.922, group: 15, period: 4, type: 'metalloid' },
+            { symbol: 'Se', name: 'Selenium', number: 34, mass: 78.971, group: 16, period: 4, type: 'nonmetal' },
+            { symbol: 'Br', name: 'Bromine', number: 35, mass: 79.904, group: 17, period: 4, type: 'halogen' },
+            { symbol: 'Kr', name: 'Krypton', number: 36, mass: 83.798, group: 18, period: 4, type: 'noble-gas' },
+            // Add a few Lanthanides/Actinides for demonstration of the separate blocks
+            { symbol: 'La', name: 'Lanthanum', number: 57, mass: 138.91, group: -1, period: 6, type: 'lanthanide' },
+            { symbol: 'Ce', name: 'Cerium', number: 58, mass: 140.12, group: -1, period: 6, type: 'lanthanide' },
+            { symbol: 'Ac', name: 'Actinium', number: 89, mass: 227, group: -1, period: 7, type: 'actinide' },
+            { symbol: 'Th', name: 'Thorium', number: 90, mass: 232.04, group: -1, period: 7, type: 'actinide' },
+            { symbol: 'U', name: 'Uranium', number: 92, mass: 238.03, group: -1, period: 7, type: 'actinide' },
+        ];
+        
+        // Helper to get element data
+        function getElement(symbol) {
+            return periodicTableData.find(el => el.symbol === symbol);
+        }
+
+        window.showElementProperties = function(symbol) {
+            const element = getElement(symbol);
+            const modal = document.getElementById('element-modal');
+            const detailsDiv = document.getElementById('element-details');
+            const modalContent = document.getElementById('element-modal-content');
+
+            if (!element) return;
+            
+            detailsDiv.innerHTML = `
+                <div class="p-4 rounded-lg border-2 border-blue-100 bg-blue-50">
+                    <h4 class="text-3xl font-extrabold text-blue-800">${element.name} (${element.symbol})</h4>
+                    <p class="text-lg text-gray-600 mt-1">Atomic Number: <span class="font-bold text-gray-900">${element.number}</span></p>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="p-3 bg-gray-100 rounded-lg">
+                        <p class="font-medium text-gray-500">Atomic Mass</p>
+                        <p class="font-bold text-gray-800">${element.mass} u</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded-lg">
+                        <p class="font-medium text-gray-500">Group</p>
+                        <p class="font-bold text-gray-800">${element.group > 0 ? element.group : 'N/A'}</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded-lg">
+                        <p class="font-medium text-gray-500">Period</p>
+                        <p class="font-bold text-gray-800">${element.period}</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded-lg">
+                        <p class="font-medium text-gray-500">Type</p>
+                        <p class="font-bold text-gray-800 capitalize">${element.type.replace('-', ' ')}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Show modal with animation
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 50);
+            lucide.createIcons();
+        }
+
+        window.closeElementProperties = function() {
+            const modal = document.getElementById('element-modal');
+            const modalContent = document.getElementById('element-modal-content');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderPeriodicTable() {
+            const elementCell = (el, gridRow, gridCol) => {
+                const typeClass = `color-${el.type}`;
+                const cellStyle = `grid-area: ${gridRow} / ${gridCol};`;
+
+                return `
+                    <div class="w-full h-full p-1 border border-gray-300 rounded-lg shadow-md transition-all hover:shadow-xl hover:scale-[1.02] cursor-pointer ${typeClass}" 
+                         style="${cellStyle}"
+                         onclick="showElementProperties('${el.symbol}')">
+                        <p class="text-xs font-bold text-center leading-tight">${el.number}</p>
+                        <p class="text-xl font-extrabold text-center leading-none">${el.symbol}</p>
+                        <p class="text-xs text-center leading-tight mt-1 truncate">${el.mass.toFixed(2)}</p>
+                    </div>
+                `;
+            };
+
+            const getElementCell = (r, c) => {
+                const element = periodicTableData.find(el => el.period === r && el.group === c);
+                if (element) return elementCell(element, r, c);
+                
+                // Special cells for gaps
+                if (r === 1 && c >= 2 && c <= 17) return `<div style="grid-area: ${r} / ${c};"></div>`; // Period 1 gap
+                if (r === 2 && c >= 3 && c <= 12) return `<div style="grid-area: ${r} / ${c};"></div>`; // Period 2 gap
+                if (r === 3 && c >= 3 && c <= 12) return `<div style="grid-area: ${r} / ${c};"></div>`; // Period 3 gap
+                if (r === 6 && c === 3) return `<div class="bg-gray-200 text-xs text-center p-1 rounded-md flex items-center justify-center cursor-pointer" style="grid-area: 6 / 3;" onclick="document.getElementById('lanthanides-row').scrollIntoView({ behavior: 'smooth' })">57-71<br>Ln</div>`;
+                if (r === 7 && c === 3) return `<div class="bg-gray-200 text-xs text-center p-1 rounded-md flex items-center justify-center cursor-pointer" style="grid-area: 7 / 3;" onclick="document.getElementById('actinides-row').scrollIntoView({ behavior: 'smooth' })">89-103<br>Ac</div>`;
+
+                return `<div style="grid-area: ${r} / ${c};"></div>`;
+            };
+            
+            let tableHtml = '';
+            for (let r = 1; r <= 7; r++) {
+                for (let c = 1; c <= 18; c++) {
+                    tableHtml += getElementCell(r, c);
+                }
+            }
+            
+            // Lanthanides and Actinides (separate rows)
+            const lanthanides = periodicTableData.filter(el => el.type === 'lanthanide');
+            const actinides = periodicTableData.filter(el => el.type === 'actinide');
+
+            const lanthanideHtml = lanthanides.map((el, index) => elementCell(el, 1, index + 4)).join('');
+            const actinideHtml = actinides.map((el, index) => elementCell(el, 1, index + 4)).join('');
+            
+
+            return `
+                <div class="overflow-x-auto min-w-full">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i data-lucide="atom" class="w-6 h-6 mr-2 text-blue-600"></i> Interactive Periodic Table
+                    </h2>
+                    
+                    <!-- Main Table Grid -->
+                    <div class="grid gap-1.5 p-2 bg-white border border-gray-300 rounded-xl shadow-lg" 
+                         style="grid-template-columns: repeat(18, minmax(40px, 1fr)); grid-template-rows: repeat(7, minmax(60px, 1fr)); min-width: 900px;">
+                        
+                        <!-- Column Headers -->
+                        ${Array.from({ length: 18 }, (_, i) => `<div class="text-xs font-semibold text-center text-gray-500">${i + 1}</div>`).join('')}
+
+                        <!-- Table Cells -->
+                        ${tableHtml}
+                    </div>
+
+                    <!-- Lanthanide Block -->
+                    <div class="mt-8 pt-4 border-t border-gray-300">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Inner Transition Metals</h3>
+                        <div class="grid gap-1.5 p-2 bg-gray-100 rounded-xl" 
+                             style="grid-template-columns: repeat(15, minmax(40px, 1fr)); min-width: 900px;">
+                             <!-- Row Headers -->
+                             <div class="text-sm font-semibold text-gray-500 flex items-center justify-center">La</div>
+                             <div id="lanthanides-row" class="col-span-14 grid gap-1.5" style="grid-template-columns: subgrid; grid-template-rows: 60px;">
+                                ${lanthanideHtml}
+                             </div>
+                             
+                             <!-- Separator -->
+                             <div class="col-span-15 h-2"></div>
+                             
+                             <!-- Actinide Block -->
+                             <div class="text-sm font-semibold text-gray-500 flex items-center justify-center">Ac</div>
+                             <div id="actinides-row" class="col-span-14 grid gap-1.5" style="grid-template-columns: subgrid; grid-template-rows: 60px;">
+                                ${actinideHtml}
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Key -->
+                    <div class="mt-6 p-4 bg-gray-100 rounded-lg text-sm grid grid-cols-2 md:grid-cols-4 gap-3">
+                         ${periodicTableData.map(el => el.type).filter((value, index, self) => self.indexOf(value) === index).map(type => `
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2 color-${type} border border-gray-400"></span>
+                                <span class="capitalize text-gray-700">${type.replace('-', ' ')}</span>
+                            </span>
+                         `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // -------------------------------------------------------------------
+        // --- 3. UNIT CONVERTER IMPLEMENTATION ---
+        // -------------------------------------------------------------------
+
+        const unitConversionMap = {
+            'Length': {
+                'meters': 1,
+                'kilometers': 1000,
+                'miles': 1609.34,
+                'yards': 0.9144,
+                'feet': 0.3048,
+                'inches': 0.0254,
+                'centimeters': 0.01,
+            },
+            'Mass': {
+                'kilograms': 1,
+                'grams': 0.001,
+                'metric tons': 1000,
+                'pounds': 0.453592,
+                'ounces': 0.0283495,
+            },
+            'Time': {
+                'seconds': 1,
+                'minutes': 60,
+                'hours': 3600,
+                'days': 86400,
+                'years': 31536000, // approximation
+            }
+        };
+
+        window.convertUnit = function() {
+            const categorySelect = document.getElementById('converter-category');
+            const fromUnitSelect = document.getElementById('converter-from');
+            const toUnitSelect = document.getElementById('converter-to');
+            const inputField = document.getElementById('converter-input');
+            const outputField = document.getElementById('converter-output');
+            
+            const category = categorySelect.value;
+            const fromUnit = fromUnitSelect.value;
+            const toUnit = toUnitSelect.value;
+            const inputValue = parseFloat(inputField.value);
+
+            if (isNaN(inputValue)) {
+                outputField.value = 'Invalid Input';
+                return;
+            }
+
+            try {
+                const factors = unitConversionMap[category];
+                if (!factors || !factors[fromUnit] || !factors[toUnit]) {
+                    outputField.value = 'Conversion Error';
+                    return;
+                }
+
+                // 1. Convert input to the base unit (base unit has factor 1)
+                const valueInBase = inputValue * factors[fromUnit];
+                
+                // 2. Convert from base unit to the target unit
+                const finalValue = valueInBase / factors[toUnit];
+                
+                outputField.value = finalValue.toPrecision(8);
+
+            } catch (e) {
+                outputField.value = 'Error';
+                console.error("Conversion failed:", e);
+            }
+        }
+        
+        window.updateUnitOptions = function() {
+            const category = document.getElementById('converter-category').value;
+            const fromUnitSelect = document.getElementById('converter-from');
+            const toUnitSelect = document.getElementById('converter-to');
+            
+            const units = unitConversionMap[category];
+            const unitKeys = Object.keys(units);
+
+            let optionsHtml = unitKeys.map(unit => 
+                `<option value="${unit}">${unit.charAt(0).toUpperCase() + unit.slice(1)}</option>`
+            ).join('');
+
+            fromUnitSelect.innerHTML = optionsHtml;
+            toUnitSelect.innerHTML = optionsHtml;
+
+            // Set default selections
+            fromUnitSelect.value = unitKeys[0];
+            toUnitSelect.value = unitKeys.length > 1 ? unitKeys[1] : unitKeys[0]; 
+
+            // Trigger conversion immediately after updating options
+            convertUnit(); 
+        }
+
+        function initializeUnitConverter() {
+            // Ensure the initial state is correct when the component loads
+            updateUnitOptions();
+        }
+
+        function renderUnitConverter() {
+            const categories = Object.keys(unitConversionMap);
+
+            const categoryOptions = categories.map(cat => 
+                `<option value="${cat}">${cat}</option>`
+            ).join('');
+
+            return `
+                <div class="max-w-xl mx-auto space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i data-lucide="scale" class="w-6 h-6 mr-2 text-blue-600"></i> Advanced Unit Converter
+                    </h2>
+
+                    <!-- Category Selection -->
+                    <div>
+                        <label for="converter-category" class="block text-sm font-medium text-gray-700 mb-2">Conversion Category</label>
+                        <select id="converter-category" onchange="updateUnitOptions()"
+                                class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            ${categoryOptions}
+                        </select>
+                    </div>
+
+                    <!-- Conversion Inputs -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                        <!-- Input Value -->
+                        <div>
+                            <label for="converter-input" class="block text-sm font-medium text-gray-700 mb-2">Input Value</label>
+                            <input type="number" id="converter-input" value="1.0" oninput="convertUnit()"
+                                   class="w-full p-3 border border-gray-300 rounded-lg shadow-sm text-lg font-mono focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <!-- From Unit -->
+                        <div>
+                            <label for="converter-from" class="block text-sm font-medium text-gray-700 mb-2">From Unit</label>
+                            <select id="converter-from" onchange="convertUnit()"
+                                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Separator / Swap Button -->
+                    <div class="flex items-center justify-center py-4">
+                        <i data-lucide="arrow-down" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+
+                    <!-- Conversion Outputs -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                         <!-- Output Value (Result) -->
+                        <div>
+                            <label for="converter-output" class="block text-sm font-medium text-gray-700 mb-2">Result</label>
+                            <input type="text" id="converter-output" readonly value="0"
+                                   class="w-full p-3 border border-blue-500 bg-blue-50 rounded-lg shadow-inner text-lg font-mono font-bold focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                         <!-- To Unit -->
+                        <div>
+                            <label for="converter-to" class="block text-sm font-medium text-gray-700 mb-2">To Unit</label>
+                            <select id="converter-to" onchange="convertUnit()"
+                                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 text-center">
+                        <p class="text-sm text-gray-500">Conversions include common units for **Length, Mass, and Time**.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Other Page Rendering Functions (Kept for completeness) ---
+        function renderErrorPage(title, message) {
+             return `
+                <div class="content-area p-10 text-center">
+                    <i data-lucide="alert-triangle" class="w-12 h-12 text-yellow-500 mx-auto"></i>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-4">${title}</h2>
+                    <p class="text-gray-600 mt-2">${message}</p>
+                    <button class="mt-6 hikmah-bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:hikmah-hover transition" onclick="renderPage('dashboard')">
+                        Go to Dashboard
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderNotificationItem(notif) {
+            const iconMap = {
+                'Update': { icon: 'zap', color: 'blue' },
+                'Progress': { icon: 'award', color: 'green' },
+                'System': { icon: 'shield-alert', color: 'red' },
+            };
+            const { icon, color } = iconMap[notif.type] || { icon: 'info', color: 'gray' };
+            
+            let dateFormatted;
+            const notifDate = new Date(notif.date);
+            const today = new Date();
+            const oneDay = 24 * 60 * 60 * 1000; 
+
+            if (today - notifDate < oneDay) {
+                dateFormatted = notifDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            } else {
+                dateFormatted = notifDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            
+            const readClass = notif.read ? 'bg-gray-50 opacity-80' : 'bg-blue-50 hover:bg-blue-100 border-blue-200 shadow-md';
+            const indicator = notif.read ? '' : `<span class="h-2 w-2 bg-blue-600 rounded-full mr-3 flex-shrink-0 mt-2"></span>`;
+
+            return `
+                <div class="p-4 rounded-xl border border-gray-200 cursor-pointer transition ${readClass}" 
+                    onclick="${notif.action}">
+                    <div class="flex items-start">
+                        ${indicator}
+                        <div class="flex-shrink-0 mr-4 mt-1">
+                            <i data-lucide="${icon}" class="w-6 h-6 text-${color}-600"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-lg font-semibold text-gray-900">${notif.title}</h4>
+                                <span class="text-xs text-gray-500">${dateFormatted}</span>
+                            </div>
+                            <p class="text-sm text-gray-700 mt-1">${notif.message.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNotificationPage() {
+            const notifications = generateRealTimeNotifications();
+            const unreadCount = notifications.filter(n => !n.read).length;
+
+            const notificationsHtml = notifications.map(renderNotificationItem).join('');
+            
+            return `
+                <div class="content-area p-6 lg:p-10">
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 border-b pb-4 flex items-center">
+                        <i data-lucide="bell" class="w-8 h-8 mr-3 text-blue-600"></i> Notification Center
+                        ${unreadCount > 0 ? `<span class="ml-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow-md">${unreadCount} New</span>` : ''}
+                    </h1>
+
+                    <div class="max-w-4xl mx-auto space-y-4">
+                        <div class="flex justify-between items-center pb-2">
+                            <p class="text-gray-500 text-sm">${notifications.length} total notifications (Dynamically Generated)</p>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center transition" onclick="alert('In a real app, this would mark all progress-based notifications as "read" in the database.')">
+                                <i data-lucide="check-check" class="w-4 h-4 mr-1"></i> Mark All as Read
+                            </button>
+                        </div>
+                        
+                        ${notificationsHtml}
+                        
+                        ${notifications.length === 0 ? '<p class="text-center text-gray-500 py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">No new notifications.</p>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfilePage() {
+            const totalChapters = calculateTotalChapters();
+            const completedChapters = calculateCompletedChapters();
+            const completionPercentage = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;
+            
+            const mockName = userId.startsWith('anonymous') ? 'Anonymous Learner' : `User ID: ${userId.substring(0, 8)}...`;
+            const profileImageUrl = `https://placehold.co/100x100/${completionPercentage > 50 ? '067c4d' : '3b82f6'}/ffffff?text=${completionPercentage}%25`; 
+
+            function renderSubjectProgressCards() {
+                let html = '';
+                
+                for (const subject in ncertChapters) {
+                    const chapters = ncertChapters[subject];
+                    let completedInSubject = 0;
+
+                    chapters.forEach(chapter => {
+                        if (userProgress[chapter.id]?.completed === true) {
+                            completedInSubject++;
+                        }
+                    });
+
+                    const totalInSubject = chapters.length;
+                    const subjectPercentage = totalInSubject > 0 ? Math.round((completedInSubject / totalInSubject) * 100) : 0;
+                    
+                    let color = '';
+                    if (subject === 'Physics') color = 'blue';
+                    else if (subject === 'Chemistry') color = 'orange';
+                    else if (subject === 'Math') color = 'green';
+                    else if (subject === 'Biology') color = 'purple';
+
+                    html += `
+                        <div class="p-4 border-l-4 border-${color}-400 bg-${color}-50 rounded-lg flex justify-between items-center transition hover:shadow-md cursor-pointer" 
+                            onclick="renderPage('subject', '${subject}')">
+                            <div>
+                                <p class="text-lg font-semibold text-gray-800">${subject}</p>
+                                <p class="text-sm text-gray-600">${completedInSubject} of ${totalInSubject} Chapters Completed</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-${color}-600">${subjectPercentage}%</span>
+                                <div class="w-20 bg-gray-200 rounded-full h-1.5 mt-1">
+                                    <div class="bg-${color}-500 h-1.5 rounded-full" style="width: ${subjectPercentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return html;
+            }
+
+
+            return `
+                <div class="content-area p-6 lg:p-10">
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 border-b pb-4 flex items-center">
+                        <i data-lucide="user-circle" class="w-8 h-8 mr-3 hikmah-primary"></i> My Learning Profile
+                    </h1>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-xl border border-gray-200 sticky top-24">
+                            <div class="flex flex-col items-center text-center">
+                                <img src="${profileImageUrl}" alt="User Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-gray-100 shadow-md mb-4">
+                                
+                                <h2 class="text-2xl font-bold text-gray-900">${mockName}</h2>
+                                <p class="text-sm text-gray-500 mb-4">Class 12 PCMB Student</p>
+                                
+                                <div class="bg-gray-100 p-3 rounded-lg w-full mt-4">
+                                    <p class="text-xs font-semibold text-gray-700">Unique Canvas User ID:</p>
+                                    <p class="font-mono text-sm text-green-700 break-all mt-1">${userId}</p>
+                                </div>
+                                
+                                <button class="mt-6 w-full text-blue-600 border border-blue-600 hover:bg-blue-50 py-2 rounded-lg font-semibold transition flex items-center justify-center">
+                                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Account Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="p-6 bg-blue-50 rounded-xl border border-blue-200 shadow-lg">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5 mr-2"></i> Overall Learning Progress
+                                
+                                </h3>
+                                <div class="flex items-center space-x-6">
+                                    <div class="relative w-24 h-24">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"></circle>
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#067c4d" stroke-width="10" 
+                                                    stroke-dasharray="${completionPercentage * 2.83}, 283" 
+                                                    style="transition: stroke-dasharray 1s ease-out;"></circle>
+                                        </svg>
+                                        <span class="absolute inset-0 flex items-center justify-center text-xl font-bold text-gray-800">${completionPercentage}%</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-3xl font-extrabold text-gray-900">${completedChapters} / ${totalChapters}</p>
+                                        <p class="text-gray-600">Chapters with Notes Marked Complete</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-lg">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-3 flex items-center">
+                                    <i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Subject Breakdown
+                                </h3>
+                                <div class="space-y-4">
+                                    ${renderSubjectProgressCards()}
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        window.updateLessonContent = function(tabName, subject, chapterId) {
+            const contentDiv = document.getElementById('lesson-content-display');
+            if (!contentDiv) return;
+
+            const tabs = ['Notes', 'DPP', 'Key Formulas', 'Doubt', 'Ask'];
+            
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab-${tab.toLowerCase().replace(' ', '-')}`);
+                if (btn) {
+                    btn.className = (tab === tabName) 
+                        ? 'text-blue-600 border-b-2 border-blue-600 font-semibold py-2 transition whitespace-nowrap'
+                        : 'text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap';
+                }
+            });
+
+            contentDiv.classList.remove('fade-in-content');
+            void contentDiv.offsetWidth; 
+            contentDiv.classList.add('fade-in-content');
+
+
+            const chapter = ncertChapters[subject] ? ncertChapters[subject].find(c => c.id === chapterId) : null;
+            const chapterTitle = chapter ? `Chapter ${chapter.chapter}: ${chapter.title}` : 'This Chapter';
+            const isCompleted = userProgress[chapterId]?.completed === true;
+
+            let contentHtml = '';
+            
+            if (tabName === 'Notes') {
+                
+                const completionButton = isCompleted
+                    ? `
+                        <button onclick="toggleChapterComplete('${subject}', '${chapterId}', false)"
+                            class="mt-4 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition flex items-center shadow-lg">
+                            <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Marked as Complete (Click to Undo)
+                        </button>
+                    `
+                    : `
+                        <button onclick="toggleChapterComplete('${subject}', '${chapterId}', true)"
+                            class="mt-4 hikmah-bg-primary text-white py-2 px-4 rounded-lg font-semibold hover:hikmah-hover transition flex items-center shadow-lg">
+                            <i data-lucide="award" class="w-5 h-5 mr-2"></i> Mark Notes as Complete
+                        </button>
+                    `;
+
+
+                contentHtml = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-800 border-b pb-2">Detailed Notes & Synopsis for ${chapterTitle}</h3>
+                        <p class="text-gray-700">This section provides the **core concepts and necessary background** for the chapter. Use this to prepare before the full lecture video is released, or as a reference while solving problems.</p>
+                        <ul class="list-disc list-inside space-y-1 ml-4 text-gray-600 text-sm">
+                            <li>**Key Focus:** Introduction, Definitions, and Main Formulas.</li>
+                            <li>Downloadable PDF of summary notes available below.</li>
+                        </ul>
+                        <button class="mt-4 text-sm font-medium hikmah-primary hover:text-blue-700 flex items-center bg-blue-50 px-3 py-2 rounded-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download Summary Notes PDF
+                        </button>
+                        ${completionButton}
+                    </div>
+                `;
+            } else if (tabName === 'DPP') {
+                contentHtml = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-800 border-b pb-2">Daily Practice Problems (DPP) for ${chapterTitle}</h3>
+                        <p class="text-gray-700">Even before the full lecture is out, you can start building a foundation! These practice problems focus on **board exam basics and pre-requisite knowledge** related to this chapter.</p>
+                        
+                        <div class="space-y-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="font-semibold text-yellow-800">DPP Set 1: Pre-requisite Knowledge Check</p>
+                            <p class="text-sm text-gray-700">5 simple questions to ensure you have the necessary foundations to start this chapter.</p>
+                            <button class="text-sm font-medium text-yellow-700 hover:underline flex items-center">
+                                <i data-lucide="zap" class="w-4 h-4 mr-2"></i> Start Quiz
+                            </button>
+                        </div>
+                        <div class="space-y-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="font-semibold text-yellow-800">DPP Set 2: Conceptual Questions (Long Answer)</p>
+                            <p class="text-sm text-gray-700">3 conceptual questions to ponder while waiting for the full lecture.</p>
+                            <button class="text-sm font-medium text-yellow-700 hover:underline flex items-center">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> View Problems
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (tabName === 'Key Formulas') {
+                const formulas = chapterFormulas[chapterId] || [];
+                
+                let formulaListHtml = formulas.map(item => `
+                    <div class="flex flex-col border-b border-gray-300 last:border-b-0 py-3">
+                        <p class="text-md font-bold text-blue-800 mb-2">${item.name}</p>
+                        <div class="text-xl font-mono text-gray-900 overflow-x-auto p-4 bg-white border border-dashed border-gray-300 rounded-lg shadow-sm">
+                            ${item.formula}
+                        </div>
+                    </div>
+                `).join('');
+                
+                if (formulaListHtml === '') {
+                    formulaListHtml = `<div class="p-4 text-center text-gray-500 bg-red-50 rounded-lg border border-red-200">Formula sheet pending for this chapter. Check back soon!</div>`;
+                }
+
+                contentHtml = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-800 border-b pb-2">Key Formulas Sheet for ${chapterTitle}</h3>
+                        <p class="text-gray-700">These are the **most essential equations and principles** you need to memorize for the chapter. Print this sheet for quick revision!</p>
+                        
+                        <div class="p-4 lg:p-6 bg-white border-4 border-double border-blue-200 rounded-xl shadow-lg divide-y divide-gray-200">
+                            ${formulaListHtml}
+                        </div>
+
+                        <p class="text-xs text-gray-500 pt-2 italic">Note: Formulas are displayed using standard LaTeX notation for precise mathematical representation.</p>
+                    </div>
+                `;
+            }
+            
+            else if (tabName === 'Doubt') {
+                contentHtml = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-800 border-b pb-2">Doubt Resolution Corner for ${chapterTitle}</h3>
+                        <p class="text-gray-700">Submit any specific doubts you have about the **chapter's syllabus, required prerequisites, or the summary notes** provided in the Notes tab. We're here to help you prepare!</p>
+                        
+                        <textarea rows="4" placeholder="Type your specific doubt here (e.g., 'What are the three main topics covered in the Electrostatic Potential chapter?')." 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        <button class="mt-2 hikmah-bg-primary text-white py-2 px-4 rounded-lg font-semibold hover:hikmah-hover transition flex items-center">
+                            <i data-lucide="message-square" class="w-5 h-5 mr-2"></i> Submit Doubt
+                        </button>
+                        
+                        <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                            <h4 class="font-bold text-gray-800">Popular Q&A (Preparation Phase):</h4>
+                            <p class="text-sm text-gray-600 italic">Q: Should I revise Class 11 concepts before starting this chapter?</p>
+                            <p class="text-xs text-green-700 mt-1">A: Yes, specifically review [List of topics].</p>
+                        </div>
+                    </div>
+                `;
+            } else if (tabName === 'Ask') {
+                contentHtml = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-800 border-b pb-2">Community Discussion for ${chapterTitle}</h3>
+                        <p class="text-gray-700">This is a general discussion forum for this chapter. Share insights, motivational posts, or discuss broad conceptual topics with your peers while the lecture video is being prepared.</p>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <p class="font-semibold text-blue-800">Community Input</p>
+                            <textarea rows="3" placeholder="Join the discussion... (e.g., 'What are some real-world applications of this chapter?')" 
+                                class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <button class="mt-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center">
+                                <i data-lucide="send" class="w-5 h-5 mr-2"></i> Post Comment
+                            </button>
+                        </div>
+
+                        <div class="mt-6 space-y-3">
+                            <p class="text-sm font-medium text-gray-800">Community Posts (2)</p>
+                            <div class="p-3 bg-white border rounded-lg">
+                                <p class="text-xs font-bold text-gray-600">User 8f3c7e</p>
+                                <p class="text-sm text-gray-700 mt-1">I am really excited about this chapter, but I'm worried about the math!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = contentHtml;
+            lucide.createIcons();
+        }
+
+        function renderDashboardPage() {
+            let courseCardsHtml = courseData.map(course => createCourseCard(course)).join('');
+
+            return `
+                <div class="content-area">
+                    <div class="relative z-10">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4">
+                            <div class="flex flex-col">
+                                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Featured Courses</h1>
+                                <div class="mt-2 text-sm font-semibold text-blue-700 bg-blue-100 px-3 py-1 rounded-full w-fit flex items-center">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                                    Uses Rationalized NCERT Syllabus (2025-2026)
+                                </div>
+                            </div>
+                             <p class="text-sm text-gray-500 mt-2 sm:mt-0">User ID: <span class="font-mono text-xs text-green-700">${userId}</span></p>
+                        </div>
+                        <p class="text-lg text-gray-500 mb-8 max-w-2xl">
+                            Dive into advanced topics or choose your core NCERT subject below.
+                        </p>
+
+                        <div id="filter-tabs" class="flex gap-4 mb-12 border-b border-gray-200 pb-3">
+                            <button class="tab-button tab-active" onclick="renderPage('dashboard')">Featured Courses</button>
+                            <button class="tab-button tab-inactive" onclick="renderPage('subject', 'Physics')">Physics (NCERT)</button>
+                            <button class="tab-button tab-inactive" onclick="renderPage('subject', 'Chemistry')">Chemistry (NCERT)</button>
+                            <button class="tab-button tab-inactive" onclick="renderPage('subject', 'Math')">Mathematics (NCERT)</button>
+                            <button class="tab-button tab-inactive" onclick="renderPage('subject', 'Biology')">Biology (NCERT)</button>
+                        </div>
+
+                        <div id="course-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            ${courseCardsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubjectPage(subject) {
+            const chapters = ncertChapters[subject];
+            let subjectColorClass = '';
+            let subjectIcon = '';
+
+            if (subject === 'Physics') { subjectColorClass = 'bg-blue-600'; subjectIcon = 'zap'; }
+            else if (subject === 'Chemistry') { subjectColorClass = 'bg-orange-600'; subjectIcon = 'flask-conical'; }
+            else if (subject === 'Math') { subjectColorClass = 'bg-green-600'; subjectIcon = 'square-root'; }
+            else if (subject === 'Biology') { subjectColorClass = 'bg-purple-600'; subjectIcon = 'dna'; } 
+            else { subjectColorClass = 'bg-gray-500'; subjectIcon = 'book'; }
+
+            if (!chapters) {
+                 return `<div class="content-area p-10 text-center"><h2 class="text-2xl text-red-500">Subject Not Found</h2><button class="mt-4 text-sm text-blue-600" onclick="renderPage('dashboard')">Go Back to Dashboard</button></div>`;
+            }
+
+            const chapterListHtml = chapters.map(chapter => {
+                
+                const buttonColor = subjectColorClass.replace('bg-', 'text-');
+                
+                const cardClickAction = `renderPage('lesson', '${subject}', '${chapter.id}')`;
+                
+                const isCompleted = userProgress[chapter.id]?.completed === true;
+                const progressIndicator = isCompleted 
+                    ? `<p class="text-sm text-green-700 flex items-center mt-1 font-semibold">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Notes Completed
+                       </p>`
+                    : `<p class="text-sm text-yellow-700 flex items-center mt-1 font-semibold">
+                        <i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Full Lecture Pending
+                       </p>`;
+
+                const statusHtml = progressIndicator;
+
+                return `
+                    <div class="chapter-card flex items-center justify-between bg-white p-5 rounded-xl border border-gray-200 shadow-sm transition-all" 
+                         onclick="${cardClickAction}">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-xl font-bold w-12 h-12 ${subjectColorClass} text-white rounded-lg flex items-center justify-center shadow-lg">${chapter.chapter}</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">${chapter.title}</h3>
+                                ${statusHtml}
+                            </div>
+                        </div>
+                        <button class="text-sm ${buttonColor} font-medium flex items-center hover:underline">
+                            View Resources <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+
+            return `
+                <div class="content-area p-6 lg:p-10">
+                    <button onclick="renderPage('dashboard')" class="text-sm font-semibold text-gray-500 hover:hikmah-primary mb-8 flex items-center">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Dashboard
+                    </button>
+                    
+                    <div class="flex items-center mb-6">
+                        <i data-lucide="${subjectIcon}" class="w-8 h-8 ${subjectColorClass.replace('bg-', 'text-')} mr-3"></i>
+                        <h1 class="text-4xl font-extrabold text-gray-900">${subject} Curriculum</h1>
+                        <span class="ml-4 text-sm font-semibold ${subjectColorClass} text-white px-3 py-1 rounded-full shadow-md">Rationalized NCERT</span>
+                    </div>
+                    
+                    <p class="text-lg text-gray-500 mb-10 max-w-3xl">
+                        Select a chapter to access its notes, practice problems, and key formulas, even if the full lecture video is pending.
+                    </p>
+
+                    <div class="space-y-4">
+                        ${chapterListHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderTbdPlaceholder(subject, chapterTitle) {
+            return `
+                <div class="w-full h-full absolute inset-0 bg-gray-100 flex items-center justify-center p-8">
+                    <div class="text-center p-6 bg-white border-4 border-dashed border-yellow-300 rounded-xl shadow-xl">
+                        <i data-lucide="video-off" class="w-12 h-12 text-yellow-500 mx-auto animate-pulse"></i>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-4">Full Lecture Content Coming Soon!</h2>
+                        <p class="text-gray-600 mt-2 max-w-sm">
+                            The comprehensive video lecture for **${chapterTitle}** is currently in post-production. 
+                            Use the **Notes**, **DPP**, and **Key Formulas** sections below to start preparing!
+                        </p>
+                        <p class="mt-4 text-xs text-blue-600">
+                            We aim to release the full video shortly. Thank you for your patience!
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getChapterProgress(chapterId) {
+            const progress = userProgress[chapterId];
+            if (!progress || !progress.completed) {
+                return 0;
+            }
+            return 100;
+        }
+
+        function renderLessonPage(subject, chapterId) {
+            const chapter = ncertChapters[subject] ? ncertChapters[subject].find(c => c.id === chapterId) : null;
+            
+            const chapterTitle = chapter ? `Chapter ${chapter.chapter}: ${chapter.title}` : 'Lecture Not Found';
+            const freeAccess = true;
+            const chapterProgress = getChapterProgress(chapterId);
+
+            const videoPlayerContent = renderTbdPlaceholder(subject, chapterTitle);
+
+            const playlistContentHtml = `
+                <ul class="space-y-2">
+                    <li class="p-3 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center justify-between cursor-default opacity-70 border-l-4 border-dashed border-gray-300">
+                        <span><i data-lucide="lock" class="w-4 h-4 mr-2 inline"></i> 1. Full Lecture Part 1</span>
+                        <span class="text-xs text-red-500 font-semibold">Locked (TBD)</span>
+                    </li>
+                    <li class="p-3 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center justify-between cursor-default opacity-70 border-l-4 border-dashed border-gray-300">
+                        <span><i data-lucide="lock" class="w-4 h-4 mr-2 inline"></i> 2. Full Lecture Part 2</span>
+                        <span class="text-xs text-red-500 font-semibold">Locked (TBD)</span>
+                    </li>
+                </ul>
+                `;
+
+            const progressBarHtml = `
+                <div class="mb-6">
+                    <div class="bg-gray-100 rounded-full h-3 shadow-inner">
+                        <div class="hikmah-bg-primary h-3 rounded-full transition-all duration-700 ease-out" 
+                             style="width: ${chapterProgress}%; min-width: ${chapterProgress > 0 ? '10px' : '0'};">
+                        </div>
+                    </div>
+                    <p class="text-xs font-semibold mt-2 text-gray-600 flex justify-between">
+                        <span>Notes Preparation Phase</span>
+                        <span class="${chapterProgress === 100 ? 'text-green-600' : 'hikmah-primary'}">${chapterProgress}% Complete</span>
+                    </p>
+                </div>
+            `;
+
+
+            return `
+                <div class="content-area p-6 lg:p-10">
+                    <button onclick="renderPage('subject', '${subject}')" class="text-sm font-semibold text-gray-500 hover:hikmah-primary mb-6 flex items-center">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to ${subject} Chapters
+                    </button>
+                    
+                    <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">${chapterTitle}</h1>
+                    <div class="flex items-center space-x-3 text-gray-600 mb-8">
+                        <span class="text-md font-medium">${subject} (Rationalized Syllabus)</span>
+                        <i data-lucide="dot" class="w-4 h-4"></i>
+                        <span class="text-md font-medium flex items-center">
+                            <i data-lucide="info" class="w-4 h-4 mr-1"></i> Accessing Resources
+                        </span>
+                        ${freeAccess ? `<span class="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full">FREE ACCESS</span>` : ''}
+                    </div>
+
+                    ${progressBarHtml}
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <div class="lg:col-span-2">
+                            <div class="relative w-full aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-2xl mb-6">
+                                ${videoPlayerContent}
+                            </div>
+
+                            <div class="p-6 rounded-xl border border-gray-200 bg-white shadow-lg">
+                                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-3">Study Resources</h2>
+
+                                <div class="flex space-x-4 overflow-x-auto border-b pb-1 mb-4">
+                                    <button id="tab-notes" onclick="updateLessonContent('Notes', '${subject}', '${chapterId}')" class="text-blue-600 border-b-2 border-blue-600 font-semibold py-2 transition whitespace-nowrap">
+                                        <i data-lucide="notebook-pen" class="w-4 h-4 mr-1 inline-block"></i> Notes
+                                    </button>
+                                    <button id="tab-dpp" onclick="updateLessonContent('DPP', '${subject}', '${chapterId}')" class="text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap">
+                                        <i data-lucide="bolt" class="w-4 h-4 mr-1 inline-block"></i> DPP
+                                    </button>
+                                    <button id="tab-key-formulas" onclick="updateLessonContent('Key Formulas', '${subject}', '${chapterId}')" class="text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap">
+                                        <i data-lucide="calculator" class="w-4 h-4 mr-1 inline-block"></i> Key Formulas
+                                    </button>
+                                    <button id="tab-doubt" onclick="updateLessonContent('Doubt', '${subject}', '${chapterId}')" class="text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap">
+                                        <i data-lucide="message-square-question" class="w-4 h-4 mr-1 inline-block"></i> Doubt
+                                    </button>
+                                    <button id="tab-ask" onclick="updateLessonContent('Ask', '${subject}', '${chapterId}')" class="text-gray-500 hover:text-gray-700 font-medium py-2 transition whitespace-nowrap">
+                                        <i data-lucide="users" class="w-4 h-4 mr-1 inline-block"></i> Ask Related
+                                    </button>
+                                </div>
+                                
+                                <div id="lesson-content-display">
+                                    <!-- Content will be injected by updateLessonContent() -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-1">
+                            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-xl sticky top-24">
+                                <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-3 flex items-center">
+                                    <i data-lucide="list-video" class="w-5 h-5 mr-2 text-gray-500"></i> Video Playlist
+                                </h2>
+                                ${playlistContentHtml}
+                                <p class="text-xs text-gray-500 mt-4 italic">Full lecture access will be automatically unlocked upon upload.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createCourseCard(course) {
+            const isTbd = true;
+            const accessClass = isTbd ? 'bg-gray-400' : 'hikmah-bg-primary';
+            const hoverClass = isTbd ? 'cursor-not-allowed' : 'hover:hikmah-hover';
+
+            return `
+                <div class="course-card bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 ${isTbd ? 'opacity-80' : ''}">
+                    <div class="relative">
+                        <img src="${course.image}" alt="${course.title}" class="w-full h-40 object-cover">
+                        <span class="absolute top-4 right-4 bg-green-500 text-white font-bold px-3 py-1 rounded-full shadow-lg border border-green-300 text-sm">FREE</span>
+                    </div>
+
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold hikmah-primary mb-2">${course.title}</h3>
+                        <p class="text-sm text-gray-600 mb-4">${course.description}</p>
+
+                        <div class="flex justify-between items-center text-xs text-gray-500 border-t border-b py-3 mb-4">
+                            <div class="text-center">
+                                <i data-lucide="book-open" class="w-4 h-4 mx-auto mb-1 text-blue-500"></i>
+                                <span class="block font-semibold text-gray-800">${course.subject}</span>
+                                <span class="block">Subject</span>
+                            </div>
+                            <div class="text-center">
+                                <i data-lucide="clock" class="w-4 h-4 mx-auto mb-1 text-gray-400"></i>
+                                <span class="block font-semibold text-gray-800">TBD</span>
+                                <span class="block">Lectures</span>
+                            </div>
+                            <div class="text-center">
+                                <i data-lucide="users" class="w-4 h-4 mx-auto mb-1 text-green-500"></i>
+                                <span class="block font-semibold text-gray-800">Enroll Early</span>
+                                <span class="block">Status</span>
+                            </div>
+                        </div>
+
+                        <button class="w-full flex items-center justify-center ${accessClass} text-white py-2.5 rounded-lg font-semibold shadow-xl ${hoverClass} transition pointer-events-none">
+                            <i data-lucide="calendar-search" class="w-5 h-5 mr-2"></i>
+                            Content Release Soon
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        window.onload = function() {
+            initializeFirebase();
+        };
+    </script>
+</body>
+</html>
